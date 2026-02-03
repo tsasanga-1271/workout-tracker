@@ -1,624 +1,303 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Workout Tracker + Rest Timer</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Workout Tracker + Rest Timer</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#121a2a">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0f17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 
-  <style>
-    html { -webkit-text-size-adjust: 100%; }
+<style>
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin:0;
+  background:#0b0f17;
+  color:#e8eefc;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
 
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body { margin: 0; background:#0b0f17; color:#e8eefc; }
+.wrap {
+  max-width: 900px;
+  margin: auto;
+  padding: 16px;
+  padding-bottom: 160px;
+}
 
-    .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; padding-bottom: 150px; }
-    h1 { font-size: 20px; margin: 0 0 12px; }
+h1 { font-size: 20px; margin-bottom: 12px; }
 
-    .card { background:#121a2a; border: 1px solid #24314f; border-radius: 16px; padding: 14px; }
+.card {
+  background:#121a2a;
+  border:1px solid #24314f;
+  border-radius:18px;
+  padding:14px;
+}
 
-    label { display:block; font-size: 13px; opacity: .9; margin-bottom: 6px; }
-    input, select, textarea, button {
-      width: 100%;
-      box-sizing: border-box;
-      background:#0e1422;
-      color:#e8eefc;
-      border: 1px solid #2a3a60;
-      border-radius: 14px;
-      padding: 14px;
-      font-size: 16px;
-      outline: none;
-      min-height: 52px; /* gym-friendly */
-    }
-    input:focus, select:focus, textarea:focus { border-color:#5c7dff; }
-    textarea { min-height: 88px; resize: vertical; }
-    button { cursor: pointer; font-weight: 900; }
-    .muted { opacity: .78; font-size: 13px; line-height: 1.35; }
-    .divider { height: 1px; background:#24314f; margin: 12px 0; }
+label { font-size:13px; opacity:.85; display:block; margin-bottom:6px; }
 
-    /* rows */
-    .row { display:flex; gap: 10px; flex-wrap: wrap; }
-    .row > * { flex: 1; min-width: 160px; }
+input, select, textarea, button {
+  width:100%;
+  background:#0e1422;
+  color:#e8eefc;
+  border:1px solid #2a3a60;
+  border-radius:14px;
+  padding:14px;
+  font-size:16px;
+  min-height:52px;
+}
 
-    /* make primary action pairs look even */
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
+input[type="date"]{
+  appearance:none;
+  -webkit-appearance:none;
+  text-align:center;
+}
 
-    /* Exercises */
-    .exercise { border: 1px solid #24314f; border-radius: 16px; padding: 12px; margin-top: 12px; background:#0e1422; }
-    .exercise-header { display:flex; gap: 10px; align-items: center; }
-    .exercise-header input { flex: 1; min-width: 0; }
-    .iconBtn { width: 56px; min-width: 56px; min-height: 52px; padding: 0; font-size: 18px; }
+textarea { resize:none; min-height:90px; }
 
-    .lastBox { margin-top: 10px; padding: 10px; border: 1px dashed #2a3a60; border-radius: 14px; background: rgba(255,255,255,0.03); }
-    .lastBox strong { display:block; margin-bottom: 4px; font-size: 13px; }
+button {
+  font-weight:900;
+  cursor:pointer;
+}
 
-    .sets { margin-top: 10px; display: grid; gap: 10px; }
-    .setRow { display:flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .setRow input { flex: 1; min-width: 110px; }
-    .setRow button { width: 56px; min-width: 56px; }
+.row {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
 
-    /* Timer */
-    .pillrow { display:flex; gap: 10px; flex-wrap: wrap; }
-    .pillrow button { width: auto; padding: 12px 14px; min-height: 48px; border-radius: 999px; }
-    .timerBig { font-size: 52px; font-weight: 900; text-align: center; letter-spacing: 1px; margin: 14px 0; }
+.row > div {
+  flex:1;
+  min-width:140px;
+}
 
-    /* History */
-    .entry { border: 1px solid #24314f; border-radius: 16px; padding: 12px; background:#0e1422; }
-    .entryTop { display:flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-    .entryTitle { font-weight: 900; }
-    .entryMeta { font-size: 12px; opacity: .8; }
+.actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
 
-    .danger { border-color:#ff5c7a !important; }
+.muted { font-size:13px; opacity:.75; margin-top:6px; }
 
-    /* Pages */
-    .page { display: none; }
-    .page.active { display: block; }
+.divider {
+  height:1px;
+  background:#24314f;
+  margin:14px 0;
+}
 
-    /* Bottom tabs */
-    .tabbar{
-      position: fixed;
-      left:0; right:0; bottom:0;
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-      background: rgba(11,15,23,0.92);
-      border-top: 1px solid #24314f;
-      backdrop-filter: blur(10px);
-    }
-    .tabbar .tab{
-      min-height: 54px;
-      border-radius: 14px;
-      font-weight: 900;
-    }
-    .tabbar .tab.active{
-      border-color:#5c7dff;
-    }
+/* Pages */
+.page { display:none; }
+.page.active { display:block; }
 
-    /* Flash overlay when timer ends */
-    .flash {
-      position: fixed; inset: 0;
-      background: rgba(92,125,255,0.20);
-      opacity: 0; pointer-events: none;
-      transition: opacity 160ms;
-    }
-    .flash.on { opacity: 1; }
-  </style>
+/* Exercises */
+.exercise {
+  border:1px solid #24314f;
+  border-radius:16px;
+  padding:12px;
+  margin-top:12px;
+}
+
+.exercise-header {
+  display:flex;
+  gap:10px;
+}
+
+.iconBtn {
+  width:52px;
+  min-width:52px;
+  padding:0;
+}
+
+/* Timer */
+.timerBig {
+  text-align:center;
+  font-size:52px;
+  font-weight:900;
+  margin:14px 0;
+}
+
+.pillrow {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.pillrow button {
+  width:auto;
+  border-radius:999px;
+  padding:12px 16px;
+}
+
+/* History */
+.entry {
+  border:1px solid #24314f;
+  border-radius:16px;
+  padding:12px;
+}
+
+/* Tabs */
+.tabbar {
+  position:fixed;
+  bottom:0; left:0; right:0;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(11,15,23,.95);
+  border-top:1px solid #24314f;
+}
+
+.tabbar button.active {
+  border-color:#5c7dff;
+}
+
+/* Flash */
+.flash {
+  position:fixed;
+  inset:0;
+  background:rgba(92,125,255,.2);
+  opacity:0;
+  pointer-events:none;
+}
+.flash.on { opacity:1; }
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <h1>Workout Tracker + Rest Timer</h1>
+<div class="wrap">
+<h1>Workout Tracker + Rest Timer</h1>
 
-    <!-- PAGE: LOG -->
-    <section id="page-log" class="page active">
-      <div class="card">
-        <div class="row">
-          <div>
-            <label>Week # (auto from date)</label>
-            <input id="week" type="number" min="1" placeholder="Auto" />
-            <div class="muted" style="margin-top:6px;">Uses ISO week-of-year. You can still override it.</div>
-          </div>
-          <div>
-            <label>Day of week</label>
-            <select id="day">
-              <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-              <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
-            </select>
-          </div>
-          <div>
-            <label>Date</label>
-            <input id="date" type="date" />
-          </div>
-        </div>
+<!-- LOG PAGE -->
+<section id="page-log" class="page active">
+<div class="card">
 
-        <div class="divider"></div>
-
-        <div class="actions">
-          <button id="addExerciseBtn">+ Add Exercise</button>
-          <button id="saveBtn">Save Workout</button>
-        </div>
-
-        <div id="exerciseList"></div>
-
-        <div class="divider"></div>
-
-        <label>Notes (optional)</label>
-        <textarea id="notes" rows="3" placeholder="How it felt, any PRs, etc."></textarea>
-
-        <div class="muted" style="margin-top:12px;">
-          Tip: After you type an exercise name, you’ll see your <strong>Last time</strong> sets for that same exercise.
-        </div>
-      </div>
-    </section>
-
-    <!-- PAGE: TIMER -->
-    <section id="page-timer" class="page">
-      <div class="card">
-        <h2 style="margin:0 0 8px; font-size: 16px;">Rest Timer</h2>
-
-        <div class="pillrow">
-          <button class="preset" data-sec="60">60s</button>
-          <button class="preset" data-sec="90">90s</button>
-          <button class="preset" data-sec="120">120s</button>
-          <button class="preset" data-sec="180">180s</button>
-        </div>
-
-        <div class="row" style="margin-top:12px;">
-          <div>
-            <label>Custom seconds</label>
-            <input id="customSec" type="number" min="5" step="5" placeholder="e.g., 75" />
-          </div>
-          <div style="display:flex; align-items:end;">
-            <button id="setCustomBtn" style="width:100%;">Set</button>
-          </div>
-        </div>
-
-        <div class="timerBig" id="timerDisplay">01:30</div>
-
-        <div class="actions">
-          <button id="startPauseBtn">Start</button>
-          <button id="resetBtn">Reset</button>
-        </div>
-
-        <div class="muted" id="timerHint" style="margin-top:10px;">
-          Tip: Tap a preset → Start. It will beep + flash at 0.
-        </div>
-      </div>
-    </section>
-
-    <!-- PAGE: HISTORY -->
-    <section id="page-history" class="page">
-      <div class="card">
-        <div class="row">
-          <div>
-            <label>Search history</label>
-            <input id="search" placeholder="e.g., bench, week 3, monday" />
-          </div>
-          <div style="display:flex; align-items:end;">
-            <button id="clearAllBtn" class="danger">Clear All</button>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="muted">Workout History</div>
-        <div id="history" style="display:grid; gap: 10px; margin-top: 10px;"></div>
-      </div>
-    </section>
+<div class="row">
+  <div>
+    <label>Week # (auto from date)</label>
+    <input id="week" type="number">
+    <div class="muted">Uses ISO week-of-year</div>
   </div>
+</div>
 
-  <!-- Bottom tabs -->
-  <div class="tabbar">
-    <button class="tab active" data-page="log">Log</button>
-    <button class="tab" data-page="timer">Timer</button>
-    <button class="tab" data-page="history">History</button>
+<div class="row">
+  <div>
+    <label>Day of week</label>
+    <select id="day">
+      <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+      <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+    </select>
   </div>
+  <div>
+    <label>Date</label>
+    <input id="date" type="date">
+  </div>
+</div>
 
-  <div class="flash" id="flash"></div>
+<div class="divider"></div>
+
+<div class="actions">
+  <button id="addExerciseBtn">+ Add Exercise</button>
+  <button id="saveBtn">Save Workout</button>
+</div>
+
+<div id="exerciseList"></div>
+
+<div class="divider"></div>
+
+<label>Notes</label>
+<textarea id="notes" placeholder="How it felt, PRs, etc."></textarea>
+
+</div>
+</section>
+
+<!-- TIMER PAGE -->
+<section id="page-timer" class="page">
+<div class="card">
+
+<div class="pillrow">
+  <button data-sec="60">60s</button>
+  <button data-sec="90">90s</button>
+  <button data-sec="120">120s</button>
+  <button data-sec="180">180s</button>
+</div>
+
+<div class="row" style="margin-top:12px">
+  <div>
+    <label>Custom seconds</label>
+    <input id="customSec" type="number">
+  </div>
+  <div style="display:flex;align-items:end">
+    <button id="setCustom">Set</button>
+  </div>
+</div>
+
+<div class="timerBig" id="timerDisplay">01:30</div>
+
+<div class="actions">
+  <button id="startPause">Start</button>
+  <button id="resetTimer">Reset</button>
+</div>
+
+</div>
+</section>
+
+<!-- HISTORY PAGE -->
+<section id="page-history" class="page">
+<div class="card">
+
+<label>Search</label>
+<input id="search">
+
+<div class="divider"></div>
+
+<div id="history"></div>
+
+</div>
+</section>
+
+</div>
+
+<!-- Tabs -->
+<div class="tabbar">
+<button class="active" data-page="log">Log</button>
+<button data-page="timer">Timer</button>
+<button data-page="history">History</button>
+</div>
+
+<div class="flash" id="flash"></div>
 
 <script>
-  // ---------- Storage ----------
-  const STORAGE_KEY = "workouts_v1";
+const STORAGE="workouts_v1";
+const pages=document.querySelectorAll(".page");
+const tabs=document.querySelectorAll(".tabbar button");
 
-  function getWorkouts() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
-    catch { return []; }
-  }
-  function setWorkouts(list) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  }
+tabs.forEach(b=>b.onclick=()=>{
+  tabs.forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  pages.forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-"+b.dataset.page).classList.add("active");
+});
 
-  // ---------- ISO Week (auto Week #) ----------
-  function isoWeekNumber(dateObj) {
-    const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
-    const dayNum = d.getUTCDay() || 7; // Mon=1..Sun=7
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-  }
+const dateEl=document.getElementById("date");
+const weekEl=document.getElementById("week");
+const dayEl=document.getElementById("day");
 
-  // ---------- DOM ----------
-  const weekEl = document.getElementById("week");
-  const dayEl = document.getElementById("day");
-  const dateEl = document.getElementById("date");
-  const notesEl = document.getElementById("notes");
-  const exerciseListEl = document.getElementById("exerciseList");
-  const historyEl = document.getElementById("history");
-  const searchEl = document.getElementById("search");
-  const flashEl = document.getElementById("flash");
+function isoWeek(d){
+  d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7));
+  const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return Math.ceil((((d-y)/86400000)+1)/7);
+}
 
-  // ---------- Pages ----------
-  function showPage(name){
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    const target = document.getElementById("page-" + name);
-    if (target) target.classList.add("active");
+dateEl.valueAsDate=new Date();
+weekEl.value=isoWeek(new Date());
+dayEl.value=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date().getDay()];
 
-    document.querySelectorAll(".tabbar .tab").forEach(b => b.classList.remove("active"));
-    const tab = document.querySelector(`.tabbar .tab[data-page="${name}"]`);
-    if (tab) tab.classList.add("active");
-
-    // Friendly: focus timer display when going to timer page
-    if (name === "timer") window.scrollTo({top: 0, behavior: "instant"});
-    if (name === "history") loadHistory();
-  }
-
-  document.querySelectorAll(".tabbar .tab").forEach(btn => {
-    btn.addEventListener("click", () => showPage(btn.dataset.page));
-  });
-
-  // ---------- Previous workout lookup ----------
-  function normalizeName(s) { return (s || "").trim().toLowerCase(); }
-
-  function findLastExerciseEntry(exName) {
-    const name = normalizeName(exName);
-    if (!name) return null;
-    const all = getWorkouts();
-    for (const w of all) {
-      if (!w.exercises) continue;
-      for (const ex of w.exercises) {
-        if (normalizeName(ex.name) === name) return { workout: w, exercise: ex };
-      }
-    }
-    return null;
-  }
-
-  function formatExerciseLine(ex) {
-    const sets = (ex.sets || [])
-      .filter(s => String(s.reps).trim() || String(s.weight).trim())
-      .map(s => `${s.reps || "?"} reps @ ${s.weight || "?"}`)
-      .join(" • ");
-    return sets || "(no sets saved)";
-  }
-
-  // ---------- Exercises ----------
-  let exercises = [];
-
-  function addExercise() {
-    exercises.push({ name: "", sets: [] });
-    renderExercises();
-  }
-
-  function addSet(i) {
-    exercises[i].sets.push({ reps: "", weight: "" });
-    renderExercises();
-  }
-
-  function removeExercise(i) {
-    exercises.splice(i, 1);
-    renderExercises();
-  }
-
-  function renderExercises() {
-    exerciseListEl.innerHTML = "";
-    exercises.forEach((ex, i) => {
-      const last = findLastExerciseEntry(ex.name);
-
-      const wrap = document.createElement("div");
-      wrap.className = "exercise";
-
-      const lastHtml = last ? `
-        <div class="lastBox">
-          <strong>Last time (${last.workout.date || "no date"} • Week ${last.workout.week || "?"} • ${last.workout.day || ""})</strong>
-          <div class="muted">${formatExerciseLine(last.exercise)}</div>
-        </div>
-      ` : `
-        <div class="lastBox">
-          <strong>Last time</strong>
-          <div class="muted">Type an exercise name to show your previous sets.</div>
-        </div>
-      `;
-
-      wrap.innerHTML = `
-        <div class="exercise-header">
-          <input placeholder="Exercise name (e.g., Bench Press)" value="${ex.name.replace(/"/g,'&quot;')}" data-i="${i}" class="exName">
-          <button class="iconBtn" title="Remove exercise">✕</button>
-        </div>
-
-        ${lastHtml}
-
-        <div class="sets">
-          ${(ex.sets || []).map((s, j) => `
-            <div class="setRow">
-              <input inputmode="numeric" placeholder="Reps" value="${String(s.reps).replace(/"/g,'&quot;')}" data-i="${i}" data-j="${j}" class="repIn">
-              <input inputmode="decimal" placeholder="Weight" value="${String(s.weight).replace(/"/g,'&quot;')}" data-i="${i}" data-j="${j}" class="wtIn">
-              <button class="iconBtn" title="Remove set" data-i="${i}" data-j="${j}">−</button>
-            </div>
-          `).join("")}
-        </div>
-
-        <button style="margin-top:10px;" data-i="${i}" class="addSetBtn">+ Add Set</button>
-      `;
-
-      // remove exercise
-      wrap.querySelector(".iconBtn").addEventListener("click", () => removeExercise(i));
-
-      // add set
-      wrap.querySelector(".addSetBtn").addEventListener("click", () => addSet(i));
-
-      // exercise name input
-      wrap.querySelector(".exName").addEventListener("input", (e) => {
-        exercises[i].name = e.target.value;
-        renderExercises(); // refresh "Last time"
-      });
-
-      // reps/weight inputs
-      wrap.querySelectorAll(".repIn").forEach(inp => {
-        inp.addEventListener("input", (e) => {
-          const ii = Number(e.target.dataset.i);
-          const jj = Number(e.target.dataset.j);
-          exercises[ii].sets[jj].reps = e.target.value;
-        });
-      });
-
-      wrap.querySelectorAll(".wtIn").forEach(inp => {
-        inp.addEventListener("input", (e) => {
-          const ii = Number(e.target.dataset.i);
-          const jj = Number(e.target.dataset.j);
-          exercises[ii].sets[jj].weight = e.target.value;
-        });
-      });
-
-      // remove set buttons (by title)
-      wrap.querySelectorAll("button[title='Remove set']").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          const ii = Number(e.target.dataset.i);
-          const jj = Number(e.target.dataset.j);
-          exercises[ii].sets.splice(jj, 1);
-          renderExercises();
-        });
-      });
-
-      exerciseListEl.appendChild(wrap);
-    });
-  }
-
-  // ---------- Save Workout ----------
-  function saveWorkout() {
-    const date = String(dateEl.value || "").trim();
-    if (!date) { alert("Please select a date."); return; }
-
-    // auto week if empty
-    if (!String(weekEl.value || "").trim()) {
-      try { weekEl.value = isoWeekNumber(new Date(date)); } catch {}
-    }
-
-    const payload = {
-      week: Number(weekEl.value),
-      day: dayEl.value,
-      date: dateEl.value,
-      notes: notesEl.value,
-      exercises: exercises.map(e => ({
-        name: (e.name || "").trim(),
-        sets: (e.sets || []).map(s => ({ reps: s.reps, weight: s.weight }))
-      }))
-    };
-
-    const all = getWorkouts();
-    all.unshift(payload);
-    setWorkouts(all);
-
-    // reset
-    exercises = [];
-    notesEl.value = "";
-    renderExercises();
-    loadHistory();
-    alert("Saved!");
-
-    // optional: jump to timer after save
-    // showPage("timer");
-  }
-
-  // ---------- History ----------
-  function workoutMatchesSearch(w, q) {
-    if (!q) return true;
-    const hay = [
-      `week ${w.week || ""}`,
-      w.day || "",
-      w.date || "",
-      w.notes || "",
-      ...(w.exercises || []).flatMap(ex => [
-        ex.name || "",
-        ...((ex.sets || []).map(s => `${s.reps} ${s.weight}`))
-      ])
-    ].join(" ").toLowerCase();
-    return hay.includes(q);
-  }
-
-  function loadHistory() {
-    const q = (searchEl.value || "").trim().toLowerCase();
-    const list = getWorkouts().filter(w => workoutMatchesSearch(w, q));
-
-    historyEl.innerHTML = "";
-    list.slice(0, 50).forEach((w) => {
-      const div = document.createElement("div");
-      div.className = "entry";
-      div.innerHTML = `
-        <div class="entryTop">
-          <div class="entryTitle">Week ${w.week || "?"} • ${w.day || ""}</div>
-          <div class="entryMeta">${w.date || ""}</div>
-        </div>
-        <div class="muted" style="margin-top:8px;">
-          ${(w.exercises || []).map(ex => {
-            const line = (ex.sets || []).map(s => `${s.reps || "?"}@${s.weight || "?"}`).join(", ");
-            return `<div><strong>${(ex.name || "Unnamed")}</strong>: ${line || "(no sets)"}</div>`;
-          }).join("")}
-          ${w.notes ? `<div style="margin-top:8px;"><em>Notes:</em> ${String(w.notes).replace(/</g,"&lt;")}</div>` : ""}
-        </div>
-      `;
-      historyEl.appendChild(div);
-    });
-  }
-
-  // ---------- Timer ----------
-  let remaining = 90;
-  let timerId = null;
-  let running = false;
-
-  const timerDisplay = document.getElementById("timerDisplay");
-  const startPauseBtn = document.getElementById("startPauseBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const setCustomBtn = document.getElementById("setCustomBtn");
-  const customSec = document.getElementById("customSec");
-
-  function updateTimer() {
-    const m = String(Math.floor(remaining / 60)).padStart(2, "0");
-    const s = String(remaining % 60).padStart(2, "0");
-    timerDisplay.textContent = `${m}:${s}`;
-  }
-
-  function beep() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sine";
-      o.frequency.value = 880;
-      o.connect(g);
-      g.connect(ctx.destination);
-      g.gain.value = 0.12;
-      o.start();
-      setTimeout(() => { o.stop(); ctx.close(); }, 250);
-    } catch {}
-  }
-
-  function flash() {
-    flashEl.classList.add("on");
-    setTimeout(() => flashEl.classList.remove("on"), 260);
-  }
-
-  function buzz() {
-    if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
-  }
-
-  function setTimer(sec) {
-    remaining = sec;
-    updateTimer();
-  }
-
-  function startPause() {
-    if (running) {
-      clearInterval(timerId);
-      running = false;
-      startPauseBtn.textContent = "Start";
-      return;
-    }
-    running = true;
-    startPauseBtn.textContent = "Pause";
-    timerId = setInterval(() => {
-      if (remaining <= 0) {
-        clearInterval(timerId);
-        running = false;
-        startPauseBtn.textContent = "Start";
-        beep(); flash(); buzz();
-      } else {
-        remaining--;
-        updateTimer();
-      }
-    }, 1000);
-  }
-
-  function resetTimer() {
-    clearInterval(timerId);
-    running = false;
-    startPauseBtn.textContent = "Start";
-    remaining = 90;
-    updateTimer();
-  }
-
-  // ---------- Wire events ----------
-  document.getElementById("addExerciseBtn").addEventListener("click", addExercise);
-  document.getElementById("saveBtn").addEventListener("click", saveWorkout);
-
-  document.querySelectorAll(".preset").forEach(btn => {
-    btn.addEventListener("click", () => setTimer(Number(btn.dataset.sec)));
-  });
-
-  setCustomBtn.addEventListener("click", () => {
-    const v = Number(customSec.value);
-    if (v && v >= 5) setTimer(v);
-  });
-
-  startPauseBtn.addEventListener("click", startPause);
-  resetBtn.addEventListener("click", resetTimer);
-
-  document.getElementById("clearAllBtn").addEventListener("click", () => {
-    if (confirm("Delete all saved workouts?")) {
-      localStorage.removeItem(STORAGE_KEY);
-      loadHistory();
-    }
-  });
-
-  searchEl.addEventListener("input", loadHistory);
-
-  // Auto week when date changes
-  dateEl.addEventListener("change", () => {
-    try { weekEl.value = isoWeekNumber(new Date(dateEl.value)); } catch {}
-  });
-
-  // Default date + day
-  function setDefaultDateAndWeek() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    if (!dateEl.value) dateEl.value = `${yyyy}-${mm}-${dd}`;
-
-    try {
-      const wk = isoWeekNumber(new Date(dateEl.value));
-      if (!weekEl.value) weekEl.value = wk;
-    } catch {}
-  }
-
-  function defaultDayFromDate(d) {
-    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-    return days[d.getDay()];
-  }
-
-  // Register offline support
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
-    });
-  }
-
-  // Init
-  (function init() {
-    setDefaultDateAndWeek();
-    const today = new Date(dateEl.value);
-    dayEl.value = defaultDayFromDate(today);
-    updateTimer();
-    loadHistory();
-  })();
+if("serviceWorker"in navigator){
+  navigator.serviceWorker.register("service-worker.js");
+}
 </script>
 </body>
 </html>
