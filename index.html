@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Workout Tracker + Rest Timer</title>
+
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #0b0f17;
+      color: #e8eefc;
+    }
+
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 900px) {
+      .grid {
+        grid-template-columns: 1.25fr 0.75fr;
+      }
+    }
+
+    .card {
+      background: #121a2a;
+      border: 1px solid #24314f;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    label {
+      font-size: 12px;
+      opacity: 0.9;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      background: #0e1422;
+      color: #e8eefc;
+      border: 1px solid #2a3a60;
+      border-radius: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #5c7dff;
+      outline: none;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row > * {
+      flex: 1;
+    }
+
+    .divider {
+      height: 1px;
+      background: #24314f;
+      margin: 12px 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .actions button {
+      flex: 1;
+    }
+
+    .exercise {
+      margin-top: 10px;
+      border: 1px solid #24314f;
+      border-radius: 12px;
+      padding: 10px;
+      background: #0e1422;
+    }
+
+    .exercise-header {
+      display: flex;
+      gap: 10px;
+    }
+
+    .exercise-header button {
+      width: 44px;
+    }
+
+    .sets {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .setRow {
+      display: flex;
+      gap: 8px;
+    }
+
+    .setRow button {
+      width: 44px;
+    }
+
+    .pillrow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pillrow button {
+      width: auto;
+      padding: 8px 12px;
+    }
+
+    .timerBig {
+      font-size: 44px;
+      font-weight: 900;
+      text-align: center;
+      margin: 12px 0;
+    }
+
+    .history {
+      margin-top: 10px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .entry {
+      background: #0e1422;
+      border: 1px solid #24314f;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .entry strong {
+      font-size: 14px;
+    }
+
+    .danger {
+      border-color: #ff5c7a !important;
+    }
+
+    .muted {
+      font-size: 12px;
+      opacity: 0.75;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <h1>Workout Tracker + Rest Timer</h1>
+
+  <div class="grid">
+    <!-- LEFT: WORKOUT ENTRY -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Week #</label>
+          <input id="week" type="number" min="1" />
+        </div>
+        <div>
+          <label>Day</label>
+          <select id="day">
+            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+            <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+          </select>
+        </div>
+        <div>
+          <label>Date</label>
+          <input id="date" type="date" />
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="actions">
+        <button onclick="addExercise()">+ Add Exercise</button>
+        <button onclick="saveWorkout()">Save Workout</button>
+      </div>
+
+      <div id="exerciseList"></div>
+
+      <div class="divider"></div>
+
+      <label>Notes</label>
+      <textarea id="notes" rows="3"></textarea>
+    </div>
+
+    <!-- RIGHT: TIMER + HISTORY -->
+    <div class="card">
+      <h3>Rest Timer</h3>
+
+      <div class="pillrow">
+        <button onclick="setTimer(60)">60s</button>
+        <button onclick="setTimer(90)">90s</button>
+        <button onclick="setTimer(120)">120s</button>
+        <button onclick="setTimer(180)">180s</button>
+      </div>
+
+      <div class="timerBig" id="timerDisplay">01:30</div>
+
+      <div class="actions">
+        <button onclick="startPause()">Start</button>
+        <button onclick="resetTimer()">Reset</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <strong>Workout History</strong>
+      <div id="history" class="history"></div>
+
+      <button class="danger" onclick="clearAll()">Clear All</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let exercises = [];
+  let timer = null;
+  let remaining = 90;
+  let running = false;
+
+  function addExercise() {
+    const ex = { name: "", sets: [] };
+    exercises.push(ex);
+    renderExercises();
+  }
+
+  function addSet(i) {
+    exercises[i].sets.push({ reps: "", weight: "" });
+    renderExercises();
+  }
+
+  function removeExercise(i) {
+    exercises.splice(i, 1);
+    renderExercises();
+  }
+
+  function renderExercises() {
+    const el = document.getElementById("exerciseList");
+    el.innerHTML = "";
+    exercises.forEach((ex, i) => {
+      const div = document.createElement("div");
+      div.className = "exercise";
+      div.innerHTML = `
+        <div class="exercise-header">
+          <input placeholder="Exercise name" value="${ex.name}"
+            onchange="exercises[${i}].name=this.value">
+          <button onclick="removeExercise(${i})">✕</button>
+        </div>
+        <div class="sets">
+          ${ex.sets.map((s,j)=>`
+            <div class="setRow">
+              <input placeholder="Reps" value="${s.reps}"
+                onchange="exercises[${i}].sets[${j}].reps=this.value">
+              <input placeholder="Weight" value="${s.weight}"
+                onchange="exercises[${i}].sets[${j}].weight=this.value">
+              <button onclick="exercises[${i}].sets.splice(${j},1);renderExercises()">−</button>
+            </div>`).join("")}
+        </div>
+        <button onclick="addSet(${i})">+ Add Set</button>
+      `;
+      el.appendChild(div);
+    });
+  }
+
+  function saveWorkout() {
+    const data = {
+      week: week.value,
+      day: day.value,
+      date: date.value,
+      notes: notes.value,
+      exercises
+    };
+    const all = JSON.parse(localStorage.getItem("workouts") || "[]");
+    all.unshift(data);
+    localStorage.setItem("workouts", JSON.stringify(all));
+    exercises = [];
+    renderExercises();
+    notes.value = "";
+    loadHistory();
+  }
+
+  function loadHistory() {
+    const list = JSON.parse(localStorage.getItem("workouts") || "[]");
+    history.innerHTML = "";
+    list.forEach(w => {
+      const div = document.createElement("div");
+      div.className = "entry";
+      div.innerHTML = `
+        <strong>Week ${w.week} – ${w.day}</strong>
+        <div class="muted">${w.date}</div>
+        ${w.exercises.map(e =>
+          `<div>${e.name}: ${e.sets.map(s=>`${s.reps}x${s.weight}`).join(", ")}</div>`
+        ).join("")}
+      `;
+      history.appendChild(div);
+    });
+  }
+
+  function setTimer(sec) {
+    remaining = sec;
+    updateTimer();
+  }
+
+  function startPause() {
+    if (running) {
+      clearInterval(timer);
+      running = false;
+      return;
+    }
+    running = true;
+    timer = setInterval(() => {
+      if (remaining <= 0) {
+        clearInterval(timer);
+        running = false;
+        alert("Rest over!");
+      } else {
+        remaining--;
+        updateTimer();
+      }
+    }, 1000);
+  }
+
+  function resetTimer() {
+    clearInterval(timer);
+    running = false;
+    remaining = 90;
+    updateTimer();
+  }
+
+  function updateTimer() {
+    const m = String(Math.floor(remaining / 60)).padStart(2,"0");
+    const s = String(remaining % 60).padStart(2,"0");
+    timerDisplay.textContent = `${m}:${s}`;
+  }
+
+  function clearAll() {
+    if (confirm("Delete all workouts?")) {
+      localStorage.removeItem("workouts");
+      loadHistory();
+    }
+  }
+
+  updateTimer();
+  loadHistory();
+</script>
+</body>
+</html>
