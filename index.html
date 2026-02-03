@@ -2,256 +2,277 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Workout Tracker + Rest Timer</title>
 
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#121a2a">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <style>
-    :root {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { margin: 0; background:#0b0f17; color:#e8eefc; }
 
-    body {
-      margin: 0;
-      background: #0b0f17;
-      color: #e8eefc;
-    }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; padding-bottom: 96px; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
 
-    .wrap {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 18px;
-    }
+    .grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1.25fr 0.75fr; } }
 
-    h1 {
-      font-size: 20px;
-      margin-bottom: 12px;
-    }
+    .card { background:#121a2a; border: 1px solid #24314f; border-radius: 16px; padding: 14px; }
 
-    .grid {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: 1fr;
-    }
-
-    @media (min-width: 900px) {
-      .grid {
-        grid-template-columns: 1.25fr 0.75fr;
-      }
-    }
-
-    .card {
-      background: #121a2a;
-      border: 1px solid #24314f;
-      border-radius: 14px;
-      padding: 14px;
-    }
-
-    label {
-      font-size: 12px;
-      opacity: 0.9;
-      display: block;
-      margin-bottom: 6px;
-    }
-
+    label { display:block; font-size: 13px; opacity: .9; margin-bottom: 6px; }
     input, select, textarea, button {
       width: 100%;
-      background: #0e1422;
-      color: #e8eefc;
-      border: 1px solid #2a3a60;
-      border-radius: 10px;
-      padding: 10px;
       box-sizing: border-box;
-    }
-
-    button {
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    input:focus, textarea:focus, select:focus {
-      border-color: #5c7dff;
+      background:#0e1422;
+      color:#e8eefc;
+      border: 1px solid #2a3a60;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 16px;
       outline: none;
+      min-height: 52px; /* gym-friendly */
     }
+    input:focus, select:focus, textarea:focus { border-color:#5c7dff; }
+    textarea { min-height: 88px; resize: vertical; }
+    button { cursor: pointer; font-weight: 800; }
 
-    .row {
-      display: flex;
-      gap: 10px;
-    }
+    .row { display:flex; gap: 10px; }
+    .row > * { flex: 1; }
+    .divider { height: 1px; background:#24314f; margin: 12px 0; }
+    .muted { opacity: .78; font-size: 13px; line-height: 1.35; }
 
-    .row > * {
-      flex: 1;
-    }
+    .actions { display:flex; gap: 10px; }
+    .actions button { flex: 1; }
 
-    .divider {
-      height: 1px;
-      background: #24314f;
-      margin: 12px 0;
-    }
+    .exercise { border: 1px solid #24314f; border-radius: 16px; padding: 12px; margin-top: 12px; background:#0e1422; }
+    .exercise-header { display:flex; gap: 10px; align-items: center; }
+    .exercise-header input { flex: 1; }
+    .iconBtn { width: 56px; min-width: 56px; min-height: 52px; padding: 0; font-size: 18px; }
 
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
+    .lastBox { margin-top: 10px; padding: 10px; border: 1px dashed #2a3a60; border-radius: 14px; background: rgba(255,255,255,0.03); }
+    .lastBox strong { display:block; margin-bottom: 4px; font-size: 13px; }
 
-    .actions button {
-      flex: 1;
-    }
+    .sets { margin-top: 10px; display: grid; gap: 10px; }
+    .setRow { display:flex; gap: 10px; align-items: center; }
+    .setRow input { flex: 1; }
+    .setRow button { width: 56px; min-width: 56px; }
 
-    .exercise {
-      margin-top: 10px;
-      border: 1px solid #24314f;
-      border-radius: 12px;
-      padding: 10px;
-      background: #0e1422;
-    }
+    .pillrow { display:flex; gap: 10px; flex-wrap: wrap; }
+    .pillrow button { width: auto; padding: 12px 14px; min-height: 48px; border-radius: 999px; }
 
-    .exercise-header {
-      display: flex;
-      gap: 10px;
-    }
+    .timerBig { font-size: 52px; font-weight: 900; text-align: center; letter-spacing: 1px; margin: 14px 0; }
+    .entry { border: 1px solid #24314f; border-radius: 16px; padding: 12px; background:#0e1422; }
+    .entryTop { display:flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .entryTitle { font-weight: 900; }
+    .entryMeta { font-size: 12px; opacity: .8; }
 
-    .exercise-header button {
-      width: 44px;
-    }
+    .danger { border-color:#ff5c7a !important; }
 
-    .sets {
-      margin-top: 10px;
-      display: grid;
-      gap: 8px;
+    /* Mobile: sticky bottom bar for one-hand use */
+    .stickyBar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      background: rgba(11,15,23,0.92);
+      border-top: 1px solid #24314f;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      backdrop-filter: blur(10px);
     }
+    .stickyInner { max-width: 1000px; margin: 0 auto; display:flex; gap: 10px; }
+    .stickyInner button { flex: 1; min-height: 56px; }
 
-    .setRow {
-      display: flex;
-      gap: 8px;
+    .flash {
+      position: fixed; inset: 0;
+      background: rgba(92,125,255,0.20);
+      opacity: 0; pointer-events: none;
+      transition: opacity 160ms;
     }
-
-    .setRow button {
-      width: 44px;
-    }
-
-    .pillrow {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .pillrow button {
-      width: auto;
-      padding: 8px 12px;
-    }
-
-    .timerBig {
-      font-size: 44px;
-      font-weight: 900;
-      text-align: center;
-      margin: 12px 0;
-    }
-
-    .history {
-      margin-top: 10px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .entry {
-      background: #0e1422;
-      border: 1px solid #24314f;
-      border-radius: 12px;
-      padding: 10px;
-    }
-
-    .entry strong {
-      font-size: 14px;
-    }
-
-    .danger {
-      border-color: #ff5c7a !important;
-    }
-
-    .muted {
-      font-size: 12px;
-      opacity: 0.75;
-    }
+    .flash.on { opacity: 1; }
   </style>
 </head>
-
 <body>
-<div class="wrap">
-  <h1>Workout Tracker + Rest Timer</h1>
+  <div class="wrap">
+    <h1>Workout Tracker + Rest Timer</h1>
 
-  <div class="grid">
-    <!-- LEFT: WORKOUT ENTRY -->
-    <div class="card">
-      <div class="row">
-        <div>
-          <label>Week #</label>
-          <input id="week" type="number" min="1" />
+    <div class="grid">
+      <!-- LEFT: LOG -->
+      <div class="card">
+        <div class="row">
+          <div>
+            <label>Week # (auto from date)</label>
+            <input id="week" type="number" min="1" placeholder="Auto" />
+            <div class="muted" style="margin-top:6px;">Uses ISO week-of-year. You can still override it.</div>
+          </div>
+          <div>
+            <label>Day of week</label>
+            <select id="day">
+              <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+              <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+            </select>
+          </div>
+          <div>
+            <label>Date</label>
+            <input id="date" type="date" />
+          </div>
         </div>
-        <div>
-          <label>Day</label>
-          <select id="day">
-            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-            <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
-          </select>
+
+        <div class="divider"></div>
+
+        <div class="actions">
+          <button id="addExerciseBtn">+ Add Exercise</button>
+          <button id="saveBtn">Save Workout</button>
         </div>
-        <div>
-          <label>Date</label>
-          <input id="date" type="date" />
+
+        <div id="exerciseList"></div>
+
+        <div class="divider"></div>
+
+        <label>Notes (optional)</label>
+        <textarea id="notes" rows="3" placeholder="How it felt, any PRs, etc."></textarea>
+      </div>
+
+      <!-- RIGHT: TIMER + HISTORY -->
+      <div class="card">
+        <h2 style="margin:0 0 8px; font-size: 16px;">Rest Timer</h2>
+
+        <div class="pillrow">
+          <button class="preset" data-sec="60">60s</button>
+          <button class="preset" data-sec="90">90s</button>
+          <button class="preset" data-sec="120">120s</button>
+          <button class="preset" data-sec="180">180s</button>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <div>
+            <label>Custom seconds</label>
+            <input id="customSec" type="number" min="5" step="5" placeholder="e.g., 75" />
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button id="setCustomBtn">Set</button>
+          </div>
+        </div>
+
+        <div class="timerBig" id="timerDisplay">01:30</div>
+
+        <div class="actions">
+          <button id="startPauseBtn">Start</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="muted" id="timerHint" style="margin-top:10px;">
+          Tip: Tap a preset → Start. It will beep + flash at 0.
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+          <div>
+            <label>Search history</label>
+            <input id="search" placeholder="e.g., bench, week 3, monday" />
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button id="clearAllBtn" class="danger">Clear All</button>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div class="muted">Workout History</div>
+          <div id="history" style="display:grid; gap: 10px; margin-top: 10px;"></div>
         </div>
       </div>
-
-      <div class="divider"></div>
-
-      <div class="actions">
-        <button onclick="addExercise()">+ Add Exercise</button>
-        <button onclick="saveWorkout()">Save Workout</button>
-      </div>
-
-      <div id="exerciseList"></div>
-
-      <div class="divider"></div>
-
-      <label>Notes</label>
-      <textarea id="notes" rows="3"></textarea>
-    </div>
-
-    <!-- RIGHT: TIMER + HISTORY -->
-    <div class="card">
-      <h3>Rest Timer</h3>
-
-      <div class="pillrow">
-        <button onclick="setTimer(60)">60s</button>
-        <button onclick="setTimer(90)">90s</button>
-        <button onclick="setTimer(120)">120s</button>
-        <button onclick="setTimer(180)">180s</button>
-      </div>
-
-      <div class="timerBig" id="timerDisplay">01:30</div>
-
-      <div class="actions">
-        <button onclick="startPause()">Start</button>
-        <button onclick="resetTimer()">Reset</button>
-      </div>
-
-      <div class="divider"></div>
-
-      <strong>Workout History</strong>
-      <div id="history" class="history"></div>
-
-      <button class="danger" onclick="clearAll()">Clear All</button>
     </div>
   </div>
-</div>
+
+  <div class="stickyBar">
+    <div class="stickyInner">
+      <button id="stickyAdd">+ Exercise</button>
+      <button id="stickySave">Save</button>
+    </div>
+  </div>
+
+  <div class="flash" id="flash"></div>
 
 <script>
-  let exercises = [];
-  let timer = null;
-  let remaining = 90;
-  let running = false;
+  // ---------- Storage ----------
+  const STORAGE_KEY = "workouts_v1";
 
+  function getWorkouts() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+    catch { return []; }
+  }
+  function setWorkouts(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  // ---------- ISO Week (auto Week #) ----------
+  function isoWeekNumber(dateObj) {
+    // ISO week: Monday start, week 1 contains Jan 4th
+    const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
+    const dayNum = d.getUTCDay() || 7; // Mon=1..Sun=7
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  }
+
+  function setDefaultDateAndWeek() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    if (!dateEl.value) dateEl.value = `${yyyy}-${mm}-${dd}`;
+
+    const wk = isoWeekNumber(new Date(dateEl.value));
+    if (!weekEl.value) weekEl.value = wk;
+  }
+
+  // ---------- UI State ----------
+  let exercises = [];
+
+  // ---------- DOM ----------
+  const weekEl = document.getElementById("week");
+  const dayEl = document.getElementById("day");
+  const dateEl = document.getElementById("date");
+  const notesEl = document.getElementById("notes");
+  const exerciseListEl = document.getElementById("exerciseList");
+  const historyEl = document.getElementById("history");
+  const searchEl = document.getElementById("search");
+  const flashEl = document.getElementById("flash");
+
+  // ---------- Previous workout lookup ----------
+  function normalizeName(s) {
+    return (s || "").trim().toLowerCase();
+  }
+
+  function findLastExerciseEntry(exName) {
+    const name = normalizeName(exName);
+    if (!name) return null;
+    const all = getWorkouts();
+    for (const w of all) {
+      if (!w.exercises) continue;
+      for (const ex of w.exercises) {
+        if (normalizeName(ex.name) === name) {
+          return { workout: w, exercise: ex };
+        }
+      }
+    }
+    return null;
+  }
+
+  function formatExerciseLine(ex) {
+    const sets = (ex.sets || [])
+      .filter(s => String(s.reps).trim() || String(s.weight).trim())
+      .map(s => `${s.reps || "?"} reps @ ${s.weight || "?"}`)
+      .join(" • ");
+    return sets || "(no sets saved)";
+  }
+
+  // ---------- Exercises ----------
   function addExercise() {
-    const ex = { name: "", sets: [] };
-    exercises.push(ex);
+    exercises.push({ name: "", sets: [] });
     renderExercises();
   }
 
@@ -266,65 +287,199 @@
   }
 
   function renderExercises() {
-    const el = document.getElementById("exerciseList");
-    el.innerHTML = "";
+    exerciseListEl.innerHTML = "";
     exercises.forEach((ex, i) => {
-      const div = document.createElement("div");
-      div.className = "exercise";
-      div.innerHTML = `
-        <div class="exercise-header">
-          <input placeholder="Exercise name" value="${ex.name}"
-            onchange="exercises[${i}].name=this.value">
-          <button onclick="removeExercise(${i})">✕</button>
+      const last = findLastExerciseEntry(ex.name);
+
+      const wrap = document.createElement("div");
+      wrap.className = "exercise";
+
+      const lastHtml = last ? `
+        <div class="lastBox">
+          <strong>Last time (${last.workout.date || "no date"} • Week ${last.workout.week || "?"} • ${last.workout.day || ""})</strong>
+          <div class="muted">${formatExerciseLine(last.exercise)}</div>
         </div>
-        <div class="sets">
-          ${ex.sets.map((s,j)=>`
-            <div class="setRow">
-              <input placeholder="Reps" value="${s.reps}"
-                onchange="exercises[${i}].sets[${j}].reps=this.value">
-              <input placeholder="Weight" value="${s.weight}"
-                onchange="exercises[${i}].sets[${j}].weight=this.value">
-              <button onclick="exercises[${i}].sets.splice(${j},1);renderExercises()">−</button>
-            </div>`).join("")}
+      ` : `
+        <div class="lastBox">
+          <strong>Last time</strong>
+          <div class="muted">Type an exercise name to show your previous sets.</div>
         </div>
-        <button onclick="addSet(${i})">+ Add Set</button>
       `;
-      el.appendChild(div);
+
+      wrap.innerHTML = `
+        <div class="exercise-header">
+          <input placeholder="Exercise name (e.g., Bench Press)" value="${ex.name.replace(/"/g,'&quot;')}" data-i="${i}" class="exName">
+          <button class="iconBtn" title="Remove exercise">✕</button>
+        </div>
+
+        ${lastHtml}
+
+        <div class="sets">
+          ${(ex.sets || []).map((s, j) => `
+            <div class="setRow">
+              <input inputmode="numeric" placeholder="Reps" value="${String(s.reps).replace(/"/g,'&quot;')}" data-i="${i}" data-j="${j}" class="repIn">
+              <input inputmode="decimal" placeholder="Weight" value="${String(s.weight).replace(/"/g,'&quot;')}" data-i="${i}" data-j="${j}" class="wtIn">
+              <button class="iconBtn" title="Remove set" data-i="${i}" data-j="${j}" class="rmSet">−</button>
+            </div>
+          `).join("")}
+        </div>
+
+        <button style="margin-top:10px;" data-i="${i}" class="addSetBtn">+ Add Set</button>
+      `;
+
+      // Wire buttons
+      wrap.querySelector(".iconBtn").addEventListener("click", () => removeExercise(i));
+      wrap.querySelector(".addSetBtn").addEventListener("click", () => addSet(i));
+
+      // Inputs
+      wrap.querySelector(".exName").addEventListener("input", (e) => {
+        exercises[i].name = e.target.value;
+        // re-render to refresh "Last time" box
+        renderExercises();
+      });
+
+      wrap.querySelectorAll(".repIn").forEach(inp => {
+        inp.addEventListener("input", (e) => {
+          const ii = Number(e.target.dataset.i);
+          const jj = Number(e.target.dataset.j);
+          exercises[ii].sets[jj].reps = e.target.value;
+        });
+      });
+
+      wrap.querySelectorAll(".wtIn").forEach(inp => {
+        inp.addEventListener("input", (e) => {
+          const ii = Number(e.target.dataset.i);
+          const jj = Number(e.target.dataset.j);
+          exercises[ii].sets[jj].weight = e.target.value;
+        });
+      });
+
+      wrap.querySelectorAll("button[title='Remove set']").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const ii = Number(e.target.dataset.i);
+          const jj = Number(e.target.dataset.j);
+          exercises[ii].sets.splice(jj, 1);
+          renderExercises();
+        });
+      });
+
+      exerciseListEl.appendChild(wrap);
     });
   }
 
+  // ---------- Save Workout ----------
   function saveWorkout() {
-    const data = {
-      week: week.value,
-      day: day.value,
-      date: date.value,
-      notes: notes.value,
-      exercises
+    const week = String(weekEl.value || "").trim();
+    const date = String(dateEl.value || "").trim();
+    if (!date) { alert("Please select a date."); return; }
+    if (!week) {
+      const wk = isoWeekNumber(new Date(date));
+      weekEl.value = wk;
+    }
+
+    const payload = {
+      week: Number(weekEl.value),
+      day: dayEl.value,
+      date: dateEl.value,
+      notes: notesEl.value,
+      exercises: exercises.map(e => ({
+        name: (e.name || "").trim(),
+        sets: (e.sets || []).map(s => ({ reps: s.reps, weight: s.weight }))
+      }))
     };
-    const all = JSON.parse(localStorage.getItem("workouts") || "[]");
-    all.unshift(data);
-    localStorage.setItem("workouts", JSON.stringify(all));
+
+    const all = getWorkouts();
+    all.unshift(payload);
+    setWorkouts(all);
+
+    // reset
     exercises = [];
+    notesEl.value = "";
     renderExercises();
-    notes.value = "";
     loadHistory();
+    alert("Saved!");
+  }
+
+  // ---------- History ----------
+  function workoutMatchesSearch(w, q) {
+    if (!q) return true;
+    const hay = [
+      `week ${w.week || ""}`,
+      w.day || "",
+      w.date || "",
+      w.notes || "",
+      ...(w.exercises || []).flatMap(ex => [
+        ex.name || "",
+        ...((ex.sets || []).map(s => `${s.reps} ${s.weight}`))
+      ])
+    ].join(" ").toLowerCase();
+    return hay.includes(q);
   }
 
   function loadHistory() {
-    const list = JSON.parse(localStorage.getItem("workouts") || "[]");
-    history.innerHTML = "";
-    list.forEach(w => {
+    const q = (searchEl.value || "").trim().toLowerCase();
+    const list = getWorkouts().filter(w => workoutMatchesSearch(w, q));
+
+    historyEl.innerHTML = "";
+    list.slice(0, 30).forEach((w) => {
       const div = document.createElement("div");
       div.className = "entry";
       div.innerHTML = `
-        <strong>Week ${w.week} – ${w.day}</strong>
-        <div class="muted">${w.date}</div>
-        ${w.exercises.map(e =>
-          `<div>${e.name}: ${e.sets.map(s=>`${s.reps}x${s.weight}`).join(", ")}</div>`
-        ).join("")}
+        <div class="entryTop">
+          <div class="entryTitle">Week ${w.week || "?"} • ${w.day || ""}</div>
+          <div class="entryMeta">${w.date || ""}</div>
+        </div>
+        <div class="muted" style="margin-top:8px;">
+          ${(w.exercises || []).map(ex => {
+            const line = (ex.sets || []).map(s => `${s.reps || "?"}@${s.weight || "?"}`).join(", ");
+            return `<div><strong>${(ex.name || "Unnamed")}</strong>: ${line || "(no sets)"}</div>`;
+          }).join("")}
+          ${w.notes ? `<div style="margin-top:8px;"><em>Notes:</em> ${String(w.notes).replace(/</g,"&lt;")}</div>` : ""}
+        </div>
       `;
-      history.appendChild(div);
+      historyEl.appendChild(div);
     });
+  }
+
+  // ---------- Timer ----------
+  let remaining = 90;
+  let timerId = null;
+  let running = false;
+
+  const timerDisplay = document.getElementById("timerDisplay");
+  const startPauseBtn = document.getElementById("startPauseBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const setCustomBtn = document.getElementById("setCustomBtn");
+  const customSec = document.getElementById("customSec");
+
+  function updateTimer() {
+    const m = String(Math.floor(remaining / 60)).padStart(2, "0");
+    const s = String(remaining % 60).padStart(2, "0");
+    timerDisplay.textContent = `${m}:${s}`;
+  }
+
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = 880;
+      o.connect(g);
+      g.connect(ctx.destination);
+      g.gain.value = 0.12;
+      o.start();
+      setTimeout(() => { o.stop(); ctx.close(); }, 250);
+    } catch {}
+  }
+
+  function flash() {
+    flashEl.classList.add("on");
+    setTimeout(() => flashEl.classList.remove("on"), 260);
+  }
+
+  function buzz() {
+    if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
   }
 
   function setTimer(sec) {
@@ -334,16 +489,19 @@
 
   function startPause() {
     if (running) {
-      clearInterval(timer);
+      clearInterval(timerId);
       running = false;
+      startPauseBtn.textContent = "Start";
       return;
     }
     running = true;
-    timer = setInterval(() => {
+    startPauseBtn.textContent = "Pause";
+    timerId = setInterval(() => {
       if (remaining <= 0) {
-        clearInterval(timer);
+        clearInterval(timerId);
         running = false;
-        alert("Rest over!");
+        startPauseBtn.textContent = "Start";
+        beep(); flash(); buzz();
       } else {
         remaining--;
         updateTimer();
@@ -352,27 +510,69 @@
   }
 
   function resetTimer() {
-    clearInterval(timer);
+    clearInterval(timerId);
     running = false;
+    startPauseBtn.textContent = "Start";
     remaining = 90;
     updateTimer();
   }
 
-  function updateTimer() {
-    const m = String(Math.floor(remaining / 60)).padStart(2,"0");
-    const s = String(remaining % 60).padStart(2,"0");
-    timerDisplay.textContent = `${m}:${s}`;
-  }
+  // ---------- Wire events ----------
+  document.getElementById("addExerciseBtn").addEventListener("click", addExercise);
+  document.getElementById("saveBtn").addEventListener("click", saveWorkout);
+  document.getElementById("stickyAdd").addEventListener("click", addExercise);
+  document.getElementById("stickySave").addEventListener("click", saveWorkout);
 
-  function clearAll() {
-    if (confirm("Delete all workouts?")) {
-      localStorage.removeItem("workouts");
+  document.querySelectorAll(".preset").forEach(btn => {
+    btn.addEventListener("click", () => setTimer(Number(btn.dataset.sec)));
+  });
+
+  setCustomBtn.addEventListener("click", () => {
+    const v = Number(customSec.value);
+    if (v && v >= 5) setTimer(v);
+  });
+
+  startPauseBtn.addEventListener("click", startPause);
+  resetBtn.addEventListener("click", resetTimer);
+
+  document.getElementById("clearAllBtn").addEventListener("click", () => {
+    if (confirm("Delete all saved workouts?")) {
+      localStorage.removeItem(STORAGE_KEY);
       loadHistory();
     }
+  });
+
+  searchEl.addEventListener("input", loadHistory);
+
+  // Auto week when date changes
+  dateEl.addEventListener("change", () => {
+    try {
+      const wk = isoWeekNumber(new Date(dateEl.value));
+      weekEl.value = wk;
+    } catch {}
+  });
+
+  // Default day picker to today
+  function defaultDayFromDate(d) {
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    return days[d.getDay()];
   }
 
-  updateTimer();
-  loadHistory();
+  // Register offline support
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+    });
+  }
+
+  // Init
+  (function init() {
+    setDefaultDateAndWeek();
+    const today = new Date(dateEl.value);
+    dayEl.value = defaultDayFromDate(today);
+    updateTimer();
+    loadHistory();
+  })();
 </script>
 </body>
 </html>
