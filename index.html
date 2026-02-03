@@ -13,14 +13,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <style>
+    html { -webkit-text-size-adjust: 100%; }
+
     :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body { margin: 0; background:#0b0f17; color:#e8eefc; }
 
-    .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; padding-bottom: 96px; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; padding-bottom: 150px; }
     h1 { font-size: 20px; margin: 0 0 12px; }
-
-    .grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
-    @media (min-width: 900px) { .grid { grid-template-columns: 1.25fr 0.75fr; } }
 
     .card { background:#121a2a; border: 1px solid #24314f; border-radius: 16px; padding: 14px; }
 
@@ -39,52 +38,74 @@
     }
     input:focus, select:focus, textarea:focus { border-color:#5c7dff; }
     textarea { min-height: 88px; resize: vertical; }
-    button { cursor: pointer; font-weight: 800; }
-
-    .row { display:flex; gap: 10px; }
-    .row > * { flex: 1; }
-    .divider { height: 1px; background:#24314f; margin: 12px 0; }
+    button { cursor: pointer; font-weight: 900; }
     .muted { opacity: .78; font-size: 13px; line-height: 1.35; }
+    .divider { height: 1px; background:#24314f; margin: 12px 0; }
 
-    .actions { display:flex; gap: 10px; }
-    .actions button { flex: 1; }
+    /* rows */
+    .row { display:flex; gap: 10px; flex-wrap: wrap; }
+    .row > * { flex: 1; min-width: 160px; }
 
+    /* make primary action pairs look even */
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Exercises */
     .exercise { border: 1px solid #24314f; border-radius: 16px; padding: 12px; margin-top: 12px; background:#0e1422; }
     .exercise-header { display:flex; gap: 10px; align-items: center; }
-    .exercise-header input { flex: 1; }
+    .exercise-header input { flex: 1; min-width: 0; }
     .iconBtn { width: 56px; min-width: 56px; min-height: 52px; padding: 0; font-size: 18px; }
 
     .lastBox { margin-top: 10px; padding: 10px; border: 1px dashed #2a3a60; border-radius: 14px; background: rgba(255,255,255,0.03); }
     .lastBox strong { display:block; margin-bottom: 4px; font-size: 13px; }
 
     .sets { margin-top: 10px; display: grid; gap: 10px; }
-    .setRow { display:flex; gap: 10px; align-items: center; }
-    .setRow input { flex: 1; }
+    .setRow { display:flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .setRow input { flex: 1; min-width: 110px; }
     .setRow button { width: 56px; min-width: 56px; }
 
+    /* Timer */
     .pillrow { display:flex; gap: 10px; flex-wrap: wrap; }
     .pillrow button { width: auto; padding: 12px 14px; min-height: 48px; border-radius: 999px; }
-
     .timerBig { font-size: 52px; font-weight: 900; text-align: center; letter-spacing: 1px; margin: 14px 0; }
+
+    /* History */
     .entry { border: 1px solid #24314f; border-radius: 16px; padding: 12px; background:#0e1422; }
-    .entryTop { display:flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .entryTop { display:flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
     .entryTitle { font-weight: 900; }
     .entryMeta { font-size: 12px; opacity: .8; }
 
     .danger { border-color:#ff5c7a !important; }
 
-    /* Mobile: sticky bottom bar for one-hand use */
-    .stickyBar {
+    /* Pages */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Bottom tabs */
+    .tabbar{
       position: fixed;
-      left: 0; right: 0; bottom: 0;
+      left:0; right:0; bottom:0;
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
       background: rgba(11,15,23,0.92);
       border-top: 1px solid #24314f;
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
       backdrop-filter: blur(10px);
     }
-    .stickyInner { max-width: 1000px; margin: 0 auto; display:flex; gap: 10px; }
-    .stickyInner button { flex: 1; min-height: 56px; }
+    .tabbar .tab{
+      min-height: 54px;
+      border-radius: 14px;
+      font-weight: 900;
+    }
+    .tabbar .tab.active{
+      border-color:#5c7dff;
+    }
 
+    /* Flash overlay when timer ends */
     .flash {
       position: fixed; inset: 0;
       background: rgba(92,125,255,0.20);
@@ -98,8 +119,8 @@
   <div class="wrap">
     <h1>Workout Tracker + Rest Timer</h1>
 
-    <div class="grid">
-      <!-- LEFT: LOG -->
+    <!-- PAGE: LOG -->
+    <section id="page-log" class="page active">
       <div class="card">
         <div class="row">
           <div>
@@ -133,9 +154,15 @@
 
         <label>Notes (optional)</label>
         <textarea id="notes" rows="3" placeholder="How it felt, any PRs, etc."></textarea>
-      </div>
 
-      <!-- RIGHT: TIMER + HISTORY -->
+        <div class="muted" style="margin-top:12px;">
+          Tip: After you type an exercise name, you’ll see your <strong>Last time</strong> sets for that same exercise.
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: TIMER -->
+    <section id="page-timer" class="page">
       <div class="card">
         <h2 style="margin:0 0 8px; font-size: 16px;">Rest Timer</h2>
 
@@ -152,7 +179,7 @@
             <input id="customSec" type="number" min="5" step="5" placeholder="e.g., 75" />
           </div>
           <div style="display:flex; align-items:end;">
-            <button id="setCustomBtn">Set</button>
+            <button id="setCustomBtn" style="width:100%;">Set</button>
           </div>
         </div>
 
@@ -166,9 +193,12 @@
         <div class="muted" id="timerHint" style="margin-top:10px;">
           Tip: Tap a preset → Start. It will beep + flash at 0.
         </div>
+      </div>
+    </section>
 
-        <div class="divider"></div>
-
+    <!-- PAGE: HISTORY -->
+    <section id="page-history" class="page">
+      <div class="card">
         <div class="row">
           <div>
             <label>Search history</label>
@@ -179,19 +209,19 @@
           </div>
         </div>
 
-        <div style="margin-top:10px;">
-          <div class="muted">Workout History</div>
-          <div id="history" style="display:grid; gap: 10px; margin-top: 10px;"></div>
-        </div>
+        <div class="divider"></div>
+
+        <div class="muted">Workout History</div>
+        <div id="history" style="display:grid; gap: 10px; margin-top: 10px;"></div>
       </div>
-    </div>
+    </section>
   </div>
 
-  <div class="stickyBar">
-    <div class="stickyInner">
-      <button id="stickyAdd">+ Exercise</button>
-      <button id="stickySave">Save</button>
-    </div>
+  <!-- Bottom tabs -->
+  <div class="tabbar">
+    <button class="tab active" data-page="log">Log</button>
+    <button class="tab" data-page="timer">Timer</button>
+    <button class="tab" data-page="history">History</button>
   </div>
 
   <div class="flash" id="flash"></div>
@@ -210,27 +240,12 @@
 
   // ---------- ISO Week (auto Week #) ----------
   function isoWeekNumber(dateObj) {
-    // ISO week: Monday start, week 1 contains Jan 4th
     const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
     const dayNum = d.getUTCDay() || 7; // Mon=1..Sun=7
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
     return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
   }
-
-  function setDefaultDateAndWeek() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    if (!dateEl.value) dateEl.value = `${yyyy}-${mm}-${dd}`;
-
-    const wk = isoWeekNumber(new Date(dateEl.value));
-    if (!weekEl.value) weekEl.value = wk;
-  }
-
-  // ---------- UI State ----------
-  let exercises = [];
 
   // ---------- DOM ----------
   const weekEl = document.getElementById("week");
@@ -242,10 +257,27 @@
   const searchEl = document.getElementById("search");
   const flashEl = document.getElementById("flash");
 
-  // ---------- Previous workout lookup ----------
-  function normalizeName(s) {
-    return (s || "").trim().toLowerCase();
+  // ---------- Pages ----------
+  function showPage(name){
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    const target = document.getElementById("page-" + name);
+    if (target) target.classList.add("active");
+
+    document.querySelectorAll(".tabbar .tab").forEach(b => b.classList.remove("active"));
+    const tab = document.querySelector(`.tabbar .tab[data-page="${name}"]`);
+    if (tab) tab.classList.add("active");
+
+    // Friendly: focus timer display when going to timer page
+    if (name === "timer") window.scrollTo({top: 0, behavior: "instant"});
+    if (name === "history") loadHistory();
   }
+
+  document.querySelectorAll(".tabbar .tab").forEach(btn => {
+    btn.addEventListener("click", () => showPage(btn.dataset.page));
+  });
+
+  // ---------- Previous workout lookup ----------
+  function normalizeName(s) { return (s || "").trim().toLowerCase(); }
 
   function findLastExerciseEntry(exName) {
     const name = normalizeName(exName);
@@ -254,9 +286,7 @@
     for (const w of all) {
       if (!w.exercises) continue;
       for (const ex of w.exercises) {
-        if (normalizeName(ex.name) === name) {
-          return { workout: w, exercise: ex };
-        }
+        if (normalizeName(ex.name) === name) return { workout: w, exercise: ex };
       }
     }
     return null;
@@ -271,6 +301,8 @@
   }
 
   // ---------- Exercises ----------
+  let exercises = [];
+
   function addExercise() {
     exercises.push({ name: "", sets: [] });
     renderExercises();
@@ -319,7 +351,7 @@
             <div class="setRow">
               <input inputmode="numeric" placeholder="Reps" value="${String(s.reps).replace(/"/g,'&quot;')}" data-i="${i}" data-j="${j}" class="repIn">
               <input inputmode="decimal" placeholder="Weight" value="${String(s.weight).replace(/"/g,'&quot;')}" data-i="${i}" data-j="${j}" class="wtIn">
-              <button class="iconBtn" title="Remove set" data-i="${i}" data-j="${j}" class="rmSet">−</button>
+              <button class="iconBtn" title="Remove set" data-i="${i}" data-j="${j}">−</button>
             </div>
           `).join("")}
         </div>
@@ -327,17 +359,19 @@
         <button style="margin-top:10px;" data-i="${i}" class="addSetBtn">+ Add Set</button>
       `;
 
-      // Wire buttons
+      // remove exercise
       wrap.querySelector(".iconBtn").addEventListener("click", () => removeExercise(i));
+
+      // add set
       wrap.querySelector(".addSetBtn").addEventListener("click", () => addSet(i));
 
-      // Inputs
+      // exercise name input
       wrap.querySelector(".exName").addEventListener("input", (e) => {
         exercises[i].name = e.target.value;
-        // re-render to refresh "Last time" box
-        renderExercises();
+        renderExercises(); // refresh "Last time"
       });
 
+      // reps/weight inputs
       wrap.querySelectorAll(".repIn").forEach(inp => {
         inp.addEventListener("input", (e) => {
           const ii = Number(e.target.dataset.i);
@@ -354,6 +388,7 @@
         });
       });
 
+      // remove set buttons (by title)
       wrap.querySelectorAll("button[title='Remove set']").forEach(btn => {
         btn.addEventListener("click", (e) => {
           const ii = Number(e.target.dataset.i);
@@ -369,12 +404,12 @@
 
   // ---------- Save Workout ----------
   function saveWorkout() {
-    const week = String(weekEl.value || "").trim();
     const date = String(dateEl.value || "").trim();
     if (!date) { alert("Please select a date."); return; }
-    if (!week) {
-      const wk = isoWeekNumber(new Date(date));
-      weekEl.value = wk;
+
+    // auto week if empty
+    if (!String(weekEl.value || "").trim()) {
+      try { weekEl.value = isoWeekNumber(new Date(date)); } catch {}
     }
 
     const payload = {
@@ -398,6 +433,9 @@
     renderExercises();
     loadHistory();
     alert("Saved!");
+
+    // optional: jump to timer after save
+    // showPage("timer");
   }
 
   // ---------- History ----------
@@ -421,7 +459,7 @@
     const list = getWorkouts().filter(w => workoutMatchesSearch(w, q));
 
     historyEl.innerHTML = "";
-    list.slice(0, 30).forEach((w) => {
+    list.slice(0, 50).forEach((w) => {
       const div = document.createElement("div");
       div.className = "entry";
       div.innerHTML = `
@@ -520,8 +558,6 @@
   // ---------- Wire events ----------
   document.getElementById("addExerciseBtn").addEventListener("click", addExercise);
   document.getElementById("saveBtn").addEventListener("click", saveWorkout);
-  document.getElementById("stickyAdd").addEventListener("click", addExercise);
-  document.getElementById("stickySave").addEventListener("click", saveWorkout);
 
   document.querySelectorAll(".preset").forEach(btn => {
     btn.addEventListener("click", () => setTimer(Number(btn.dataset.sec)));
@@ -546,13 +582,23 @@
 
   // Auto week when date changes
   dateEl.addEventListener("change", () => {
-    try {
-      const wk = isoWeekNumber(new Date(dateEl.value));
-      weekEl.value = wk;
-    } catch {}
+    try { weekEl.value = isoWeekNumber(new Date(dateEl.value)); } catch {}
   });
 
-  // Default day picker to today
+  // Default date + day
+  function setDefaultDateAndWeek() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    if (!dateEl.value) dateEl.value = `${yyyy}-${mm}-${dd}`;
+
+    try {
+      const wk = isoWeekNumber(new Date(dateEl.value));
+      if (!weekEl.value) weekEl.value = wk;
+    } catch {}
+  }
+
   function defaultDayFromDate(d) {
     const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
     return days[d.getDay()];
